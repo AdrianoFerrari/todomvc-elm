@@ -49,6 +49,9 @@ state : Signal State
 state =
   Signal.foldp step initialState (Signal.subscribe updates)
 
-{---- Portals In ----}
+{---- Portals ----}
+main : Signal Html.Html
+main = Signal.map view state
+
 initialState : State
 initialState = State [Todo "test1" False 0, Todo "test2" True 1] 1
