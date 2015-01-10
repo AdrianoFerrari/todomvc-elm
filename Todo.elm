@@ -6,11 +6,8 @@ import Signal
 import String
 
 {---- State ----}
-type Visibility = All | Active | Completed
-
 type alias State =
   { todos: List Todo
-  , visibility: Visibility
   , uid: Int
   }
 
@@ -24,27 +21,34 @@ type alias Todo =
 type Delta  = NoOp
             | TodoAdd Todo
             | TodoDelete Int
-            | SetFilter Visibility
-            {-| TodoToggle Int-}
 
-update : State -> Delta -> State
-update state delta =
+step : Delta -> State -> State
+step delta state =
   case delta of
+    NoOp -> state
+
     TodoAdd todo ->
       { state | todos <- state.todos ++ [todo] }
 
     TodoDelete id ->
       { state | todos <- List.filter (\t -> not (t.id == id)) state.todos }
 
-    {-TodoToggle id ->
-      { state | todos <- List.map (\t -> if t.id then (t.completed <- not t.complete)) todos}
-        -}
-
-    SetFilter vis ->
-      { state | visibility <- vis }
-
-    NoOp -> state
-
 {---- View ----}
 
+view : State -> Html.Html
+view state =
+  Html.ul
+  []
+  [Html.text "testing"]
+
 {---- Signals ----}
+updates : Signal.Channel Delta
+updates = Signal.channel NoOp
+
+state : Signal State
+state =
+  Signal.foldp step initialState (Signal.subscribe updates)
+
+{---- Portals In ----}
+initialState : State
+initialState = State [Todo "test1" False 0, Todo "test2" True 1] 1
