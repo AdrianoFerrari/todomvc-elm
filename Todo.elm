@@ -36,7 +36,9 @@ step delta state =
       { state | field <- str }
 
     TodoAdd todo ->
-      { state | todos <- state.todos ++ [todo] }
+      { state | todos <- state.todos ++ [todo]
+              , field <- ""
+              }
 
     TodoDelete id ->
       { state | todos <- List.filter (\t -> t.id /= id) state.todos }
@@ -47,7 +49,11 @@ view : State -> Html
 view state =
   div
   []
-  [ input [on "input" targetValue (Signal.send updates << UpdateField)] []
+  [ input [ placeholder "A New Todo"
+          , value state.field
+          , on "input" targetValue (Signal.send updates << UpdateField)
+          ]
+          []
   , button [onClick (Signal.send updates (TodoAdd { title = state.field, completed = False, id = state.uid + 1}))] [text "Add"]
   , ul [] (List.map todoItemView state.todos)
   ]
