@@ -1,6 +1,8 @@
 module Todo where
 
-import Html
+import Html (..)
+import Html.Attributes (..)
+import Html.Events (..)
 import List
 import Signal
 import String
@@ -31,15 +33,23 @@ step delta state =
       { state | todos <- state.todos ++ [todo] }
 
     TodoDelete id ->
-      { state | todos <- List.filter (\t -> not (t.id == id)) state.todos }
+      { state | todos <- List.filter (\t -> t.id /= id) state.todos }
 
 {---- View ----}
 
-view : State -> Html.Html
+view : State -> Html
 view state =
-  Html.ul
+  div
   []
-  [Html.text "testing"]
+  [ button [onClick (Signal.send updates (TodoAdd { title = "default", completed = False, id = state.uid + 1}))] [text "button"]
+  , ul [] (List.map todoItemView state.todos)
+  ]
+
+todoItemView : Todo -> Html
+todoItemView todo =
+  li
+  []
+  [text todo.title]
 
 {---- Signals ----}
 updates : Signal.Channel Delta
@@ -50,7 +60,7 @@ state =
   Signal.foldp step initialState (Signal.subscribe updates)
 
 {---- Portals ----}
-main : Signal Html.Html
+main : Signal Html
 main = Signal.map view state
 
 initialState : State
