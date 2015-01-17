@@ -52,6 +52,7 @@ view state =
   [ input [ placeholder "A New Todo"
           , value state.field
           , on "input" targetValue (Signal.send updates << UpdateField)
+          , autofocus True
           ]
           []
   , button [onClick (Signal.send updates (TodoAdd { title = state.field, completed = False, id = state.uid + 1}))] [text "Add"]
@@ -62,7 +63,9 @@ todoItemView : Todo -> Html
 todoItemView todo =
   li
   []
-  [text todo.title]
+  [ text todo.title
+  , button [onClick (Signal.send updates (TodoDelete todo.id))] [text "delete"]
+  ]
 
 {---- Signals ----}
 updates : Signal.Channel Delta
@@ -77,4 +80,4 @@ main : Signal Html
 main = Signal.map view state
 
 initialState : State
-initialState = State [Todo "test1" False 0, Todo "test2" True 1] "default" 1
+initialState = State [Todo "test1" False 0, Todo "test2" True 1] "" 1
