@@ -3,31 +3,34 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Elm • TodoMVC</title>
+  <title>ElmTests</title>
   <script type="text/javascript" src="elm.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript" src="pouchdb-3.2.1.min.js"></script>
+  <!--link rel="stylesheet" href="style.css"-->
 </head>
 
 <body>
 </body>
 
 <script type="text/javascript">
-//var storedState = localStorage.getItem('elm-todo-state');
-//var startingState = storedState ? JSON.parse(storedState) : null;
+var db = new PouchDB('elm-todo-state');
+var initialState;
+var todomvc;
 
-var todomvc = Elm.fullscreen(Elm.Todo);//, {initialState: { todos: [{title: "test", false, 0}, {title: "test2", false, 1}], uid: 0}});//, { getStorage: startingState });
-/*todomvc.ports.focus.subscribe(function(selector) {
-    setTimeout(function() {
-        var nodes = document.querySelectorAll(selector);
-        if (nodes.length === 1 && document.activeElement !== nodes[0]) {
-            nodes[0].focus()
-        }
-    }, 50);
-});
+db.get('storedState')
+    .then( function (state){ todomvc = Elm.fullscreen(Elm.Todo, { getStorage: state }); }
+         , function () { todomvc = Elm.fullscreen(Elm.Todo, { getStorage: null }); }
+         )
+    .then( function(){
+        todomvc.ports.setStorage.subscribe(function(signalState) {
+          db.get('storedState').then(function(storedState){
+            signalState._id = storedState._id;
+            signalState._rev = storedState._rev;
+            db.put(signalState);
+          });
+        });
+    });
 
-todomvc.ports.setStorage.subscribe(function(state) {
-    localStorage.setItem('elm-todo-state', JSON.stringify(state));
-});*/
 
 </script>
 

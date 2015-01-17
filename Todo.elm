@@ -4,6 +4,7 @@ import Html (..)
 import Html.Attributes (..)
 import Html.Events (..)
 import List
+import Maybe
 import Signal
 import String
 
@@ -39,6 +40,7 @@ step delta state =
     TodoAdd todo ->
       { state | todos <- state.todos ++ [todo]
               , field <- ""
+              , uid <- state.uid + 1
               }
 
     TodoToggle id isCompleted->
@@ -70,11 +72,11 @@ todoItemView todo =
   li
   []
   [ input [ type' "checkbox"
-          , checked todo.completed
+          , checked todo.completed {-not toggling on click-}
           ]
           []
   , text todo.title
-  , button [onClick (Signal.send updates (TodoDelete todo.id))] [text "delete"]
+  , button [onClick (Signal.send updates (TodoDelete todo.id))] [text "x"]
   ]
 
 {---- Signals ----}
@@ -90,4 +92,10 @@ main : Signal Html
 main = Signal.map view state
 
 initialState : State
-initialState = State [Todo "test1" False 0, Todo "test2" True 1] "" 1
+initialState =
+  Maybe.withDefault (State [] "" 0) getStorage
+
+port getStorage : Maybe State
+
+port setStorage : Signal State
+port setStorage = state
