@@ -6,6 +6,7 @@
   <title>ElmTests</title>
   <script type="text/javascript" src="elm.js"></script>
   <script type="text/javascript" src="pouchdb-3.2.1.min.js"></script>
+  <script type="text/javascript" src="underscore-min.js"></script>
   <!--link rel="stylesheet" href="style.css"-->
 </head>
 
@@ -26,7 +27,14 @@ db.get('storedState')
           db.get('storedState').then(function(storedState){
             signalState._id = storedState._id;
             signalState._rev = storedState._rev;
-            db.put(signalState);
+
+            signalState.field = "";
+            storedState.field = "";
+
+            if (!_.isEqual(signalState, storedState)) {              
+              db.put(signalState);
+            }
+
           });
         });
     });
