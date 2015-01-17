@@ -43,7 +43,7 @@ step delta state =
               , uid <- state.uid + 1
               }
 
-    TodoToggle id isCompleted->
+    TodoToggle id isCompleted ->
       let updateTodo t = if t.id == id then {t | completed <- isCompleted} else t
       in
         { state | todos <- List.map updateTodo state.todos }    
@@ -72,7 +72,8 @@ todoItemView todo =
   li
   []
   [ input [ type' "checkbox"
-          , checked todo.completed {-not toggling on click-}
+          , checked todo.completed
+          , onClick (Signal.send updates (TodoToggle todo.id (not todo.completed))) 
           ]
           []
   , text todo.title
