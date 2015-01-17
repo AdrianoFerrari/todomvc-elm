@@ -10,6 +10,7 @@ import String
 {---- State ----}
 type alias State =
   { todos: List Todo
+  , field: String
   , uid: Int
   }
 
@@ -20,14 +21,19 @@ type alias Todo =
   }
 
 {---- Evolution ----}
-type Delta  = NoOp
-            | TodoAdd Todo
-            | TodoDelete Int
+type Delta
+    = NoOp
+    | UpdateField String
+    | TodoAdd Todo
+    | TodoDelete Int
 
 step : Delta -> State -> State
 step delta state =
   case delta of
     NoOp -> state
+
+    UpdateField str ->
+      { state | field <- str }
 
     TodoAdd todo ->
       { state | todos <- state.todos ++ [todo] }
@@ -41,7 +47,8 @@ view : State -> Html
 view state =
   div
   []
-  [ button [onClick (Signal.send updates (TodoAdd { title = "default", completed = False, id = state.uid + 1}))] [text "button"]
+  [ input [on "input" targetValue (Signal.send updates << UpdateField)] []
+  , button [onClick (Signal.send updates (TodoAdd { title = state.field, completed = False, id = state.uid + 1}))] [text "Add"]
   , ul [] (List.map todoItemView state.todos)
   ]
 
@@ -64,4 +71,4 @@ main : Signal Html
 main = Signal.map view state
 
 initialState : State
-initialState = State [Todo "test1" False 0, Todo "test2" True 1] 1
+initialState = State [Todo "test1" False 0, Todo "test2" True 1] "default" 1
