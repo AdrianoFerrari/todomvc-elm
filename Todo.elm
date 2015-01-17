@@ -58,10 +58,10 @@ view state =
   [ input [ placeholder "A New Todo"
           , value state.field
           , on "input" targetValue (Signal.send updates << UpdateField)
+          , onKeyPress (\key -> if key == 13 then (Signal.send updates (TodoAdd { title = state.field, completed = False, id = state.uid + 1})) else (Signal.send updates NoOp))
           , autofocus True
           ]
           []
-  , button [onClick (Signal.send updates (TodoAdd { title = state.field, completed = False, id = state.uid + 1}))] [text "Add"]
   , ul [] (List.map todoItemView state.todos)
   ]
 
