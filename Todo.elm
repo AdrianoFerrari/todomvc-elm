@@ -25,6 +25,7 @@ type Delta
     = NoOp
     | UpdateField String
     | TodoAdd Todo
+    | TodoToggle Int Bool
     | TodoDelete Int
 
 step : Delta -> State -> State
@@ -39,6 +40,11 @@ step delta state =
       { state | todos <- state.todos ++ [todo]
               , field <- ""
               }
+
+    TodoToggle id isCompleted->
+      let updateTodo t = if t.id == id then {t | completed <- isCompleted} else t
+      in
+        { state | todos <- List.map updateTodo state.todos }    
 
     TodoDelete id ->
       { state | todos <- List.filter (\t -> t.id /= id) state.todos }
@@ -63,7 +69,11 @@ todoItemView : Todo -> Html
 todoItemView todo =
   li
   []
-  [ text todo.title
+  [ input [ type' "checkbox"
+          , checked todo.completed
+          ]
+          []
+  , text todo.title
   , button [onClick (Signal.send updates (TodoDelete todo.id))] [text "delete"]
   ]
 
