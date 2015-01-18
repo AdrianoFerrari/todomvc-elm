@@ -15,6 +15,9 @@
 
 <script type="text/javascript">
 var db = new PouchDB('elm-todo-state');
+var remoteDb = new PouchDB('http://localhost:5984/elm-todo-state');
+db.sync(remoteDb, {live: true});
+
 var initialState;
 var todomvc = Elm.fullscreen(Elm.Todo, { getState: {todos: [], field: "", uid: 0} });
 
@@ -37,10 +40,12 @@ db.get('storedState')
         });
     });
 
-db.changes({live: true}).on('change', function (change) {
-  console.log(change);
-  //todomvc.ports.getState.send(change);
-});
+db.changes({live: true, include_docs: true, doc_ids: ['storedState']})
+  .on('change', function (change) {
+    var d = change.doc;
+    console.log("change");
+    todomvc.ports.getState.send({todos: d.todos, field: d.field, uid: d.uid });
+  });
 
 </script>
 
