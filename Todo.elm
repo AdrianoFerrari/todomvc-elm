@@ -1,5 +1,6 @@
 module Todo where
 
+import Basics
 import Html (..)
 import Html.Attributes (..)
 import Html.Events (..)
@@ -28,6 +29,7 @@ type Delta
     | TodoAdd Todo
     | TodoToggle Int Bool
     | TodoDelete Int
+    | SetState State
 
 step : Delta -> State -> State
 step delta state =
@@ -51,6 +53,11 @@ step delta state =
     TodoDelete id ->
       { state | todos <- List.filter (\t -> t.id /= id) state.todos }
 
+    SetState newstate ->
+      { state | todos <- newstate.todos 
+              , uid   <- Basics.max newstate.uid state.uid
+      }
+
 {---- View ----}
 
 view : State -> Html
@@ -65,6 +72,7 @@ view state =
           ]
           []
   , ul [] (List.map todoItemView state.todos)
+  , button [ onClick (Signal.send updates (SetState { todos = [], field = "", uid = 0}))] [ text "clear" ]
   ]
 
 todoItemView : Todo -> Html
@@ -94,9 +102,11 @@ main = Signal.map view state
 
 initialState : State
 initialState =
-  Maybe.withDefault (State [] "" 0) getStorage
+  Maybe.withDefault (State [] "" 0) getState
 
-port getStorage : Maybe State
+port getState : Maybe State
 
-port setStorage : Signal State
-port setStorage = state
+port saveState : Signal State
+port saveState = state
+
+port getUpdate : Signal String

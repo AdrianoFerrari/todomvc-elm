@@ -19,11 +19,11 @@ var initialState;
 var todomvc;
 
 db.get('storedState')
-    .then( function (state){ todomvc = Elm.fullscreen(Elm.Todo, { getStorage: state }); }
-         , function () { todomvc = Elm.fullscreen(Elm.Todo, { getStorage: null }); }
+    .then( function (state){ todomvc = Elm.fullscreen(Elm.Todo, { getState: state , getUpdate: "NoOp"}); }
+         , function () { todomvc = Elm.fullscreen(Elm.Todo, { getState: null , getUpdate: "NoOp" }); }
          )
     .then( function(){
-        todomvc.ports.setStorage.subscribe(function(signalState) {
+        todomvc.ports.saveState.subscribe(function(signalState) {
           db.get('storedState').then(function(storedState){
             signalState._id = storedState._id;
             signalState._rev = storedState._rev;
@@ -39,6 +39,10 @@ db.get('storedState')
         });
     });
 
+db.changes({live: true}).on('change', function (change) {
+  console.log(change);
+  //todomvc.ports.getUpdate.send(change.toString());
+});
 
 </script>
 
