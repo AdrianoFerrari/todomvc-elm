@@ -72,7 +72,7 @@ view state =
           ]
           []
   , ul [] (List.map todoItemView state.todos)
-  , button [ onClick (Signal.send updates (SetState { todos = [], field = "", uid = 0}))] [ text "clear" ]
+  , button [ onClick (Signal.send updates (SetState {todos = [], field = "", uid = 0}))] [ text "clear" ]
   ]
 
 todoItemView : Todo -> Html
@@ -94,19 +94,16 @@ updates = Signal.channel NoOp
 
 state : Signal State
 state =
-  Signal.foldp step initialState (Signal.subscribe updates)
+  Signal.foldp step emptyState (Signal.merge (Signal.map (\s -> SetState s) getState) (Signal.subscribe updates))
 
 {---- Portals ----}
 main : Signal Html
 main = Signal.map view state
 
-initialState : State
-initialState =
-  Maybe.withDefault (State [] "" 0) getState
+emptyState : State
+emptyState = State [] "" 0
 
-port getState : Maybe State
+port getState : Signal State
 
 port saveState : Signal State
 port saveState = state
-
-port getUpdate : Signal String

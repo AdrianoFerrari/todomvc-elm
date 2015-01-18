@@ -16,12 +16,10 @@
 <script type="text/javascript">
 var db = new PouchDB('elm-todo-state');
 var initialState;
-var todomvc;
+var todomvc = Elm.fullscreen(Elm.Todo, { getState: {todos: [], field: "", uid: 0} });
 
 db.get('storedState')
-    .then( function (state){ todomvc = Elm.fullscreen(Elm.Todo, { getState: state , getUpdate: "NoOp"}); }
-         , function () { todomvc = Elm.fullscreen(Elm.Todo, { getState: null , getUpdate: "NoOp" }); }
-         )
+    .then( function (state){ todomvc.ports.getState.send(state); })
     .then( function(){
         todomvc.ports.saveState.subscribe(function(signalState) {
           db.get('storedState').then(function(storedState){
@@ -41,7 +39,7 @@ db.get('storedState')
 
 db.changes({live: true}).on('change', function (change) {
   console.log(change);
-  //todomvc.ports.getUpdate.send(change.toString());
+  //todomvc.ports.getState.send(change);
 });
 
 </script>
