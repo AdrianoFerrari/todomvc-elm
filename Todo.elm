@@ -6,6 +6,7 @@ import Html.Attributes (..)
 import Html.Events (..)
 import List
 import Maybe
+import Random
 import Signal
 import String
 
@@ -42,7 +43,7 @@ step delta state =
     TodoAdd todo ->
       { state | todos <- state.todos ++ [todo]
               , field <- ""
-              , uid <- state.uid + 1
+              , uid <- fst (Random.generate (Random.int 0 10000) (Random.initialSeed state.uid))
               }
 
     TodoToggle id isCompleted ->
